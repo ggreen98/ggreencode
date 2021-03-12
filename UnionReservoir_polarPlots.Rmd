@@ -1,0 +1,126 @@
+---
+title: "Union Reservoir"
+author: "Helene Angot"
+date: "3/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r warning=FALSE, include=FALSE}
+
+
+library(openairmaps)
+# glimpse(polar_data)
+library(DT)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(openair)
+library(RColorBrewer)
+library(lubridate)
+library(data.table)
+Sys.setenv(TZ = "UTC")
+```
+
+![](map.png)
+
+[Active O&NG wells](https://corising.org/colorado-map-oil-gas-wells/)  
+
+![](wells.png)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+wind = read.table('E:/IDAT in-out/BRZ wind rose data/all time BRZ pro_eth ratio.csv', sep = ',', skip = 0, header = TRUE)
+
+wind = wind %>% 
+  mutate(date = as_datetime(time)) %>% 
+  select(date, wdr, wsp)
+
+VOC = read.table('E:/IDAT in-out/BRZ wind rose data/all time BRZ pro_eth ratio.csv', sep = ',',skip = 0, header = TRUE)
+
+VOC = VOC %>% 
+  mutate(date = as_datetime(time)) #%>%
+  #mutate(time = floor_date(time, unit = '1 min'))
+  #VOC['co2']=signif(VOC['co2'], 3)
+  #VOC['ch4']=signif(VOC['ch4'], 3)
+  #VOC['ch4dry']=signif(VOC['ch4dry'], 3)
+  #VOC['nox_x']=signif(VOC['nox_x'], 3)
+  #VOC['nox']=signif(VOC['nox'], 3)
+  #VOC['no']=signif(VOC['no'], 3)
+  #VOC['o3']=signif(VOC['o3'], 3)
+  #VOC['ch4dry']=signif(VOC['ch4dry'], 3)
+  VOC['benzene']=signif(VOC['benzene'], 3)
+  VOC['ethane']=signif(VOC['ethane'], 3)
+  VOC['acetylene']=signif(VOC['acetylene'], 2)
+  VOC['propane']=signif(VOC['propane'], 3)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+data = VOC %>% 
+  full_join(wind)
+```
+
+## CO2  
+#breaks = c(45,50, 55, 60), limits = c(45,60)
+```{r echo=FALSE}
+polarPlot(data, pollutant = 'pro_eth', x = 'wsp', wd = 'wdr', statistic = 'median', min.bin = 1, units = "", cols = "jet",#type = c('season'),
+          sub = ('Wind Speed (m/s), Min Bin # = 1'),key.footer = '', key.header = '', main = 'BRZ Jun 2017 - Feb 2021 Propane/Ethane', par.settings=list(fontsize=list(text=15)))
+?polarPlot
+```
+
+```{r echo=FALSE}
+
+pollutionRose(data, pollutant = 'benz_toul', ws = 'wsp', wd = 'wdr', main = 'BRZ Jun 2017 - Feb 2021 Ethane (m/s) > 3', breaks = c(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20),
+key.footer = '',#type = c('season'),
+cols = "jet", statistic = "mean", width = 1.5, paddle = FALSE, annotate = c(''), col = 'heat', par.settings=list(fontsize=list(text=15)))
+#breaks = c(0, .05, .1, .15, .2, .25)
+```
+#breaks = c(45, 50, 55, 60), limits = c(45, 60)
+
+The breaks correspond to:  
+* 0 to 50th percentile  
+* 50th to 90th percentile  
+* 90th to 99th percentile  
+* > 99th percentile.    
+
+## CH4 
+
+```{r echo=FALSE}
+#windRose(data, ws = 'wsp', wd = 'wdr')
+
+?pollutionRose
+
+
+```
+
+
+
+
+
+
+The breaks correspond to:  
+* 0 to 50th percentile  
+* 50th to 90th percentile  
+* 90th to 99th percentile  
+* > 99th percentile. 
+
+## Propene    
+
+```{r echo=FALSE}
+?polarFreq
+polarFreq(data, pollutant = 'o3', statistic = 'mean', breaks = c(35, 40, 45, 50, 55, 60, 65, 70),col = "jet", ws.int = 1, wd.nint = 36, min.bin = 25, grid.line = 2.5, border.col = "transparent", key.footer = '', key.header = '', sub = ('Wind Speed > 1 m/s, Min Bin # = 25'), main = 'BRZ Jun-Aug Daytime 2017-2020 Ozone by Wind Speed/Direction Frequency', par.settings=list(fontsize=list(text=7.5)))
+```
+
+## Acetylene  
+
+```{r echo=FALSE}
+polarMap(data, pollutant = 'o3', x = 'ws', wd = 'wd',breaks = c(0, 40, 45, 50, 55, 60, 65), statistic = 'mean', latitude = "lat", longitude = "lon", min.bin = 25, units = "", cols = "jet")
+```
+```{r echo=FALSE}
+windRose(data, wd = 'wd', ws = 'ws',  main = 'BRZ May-Aug Daytime 2020 Wind Rose (min wind speed > 2)', 
+          key.footer = 'wind speed (m/s)',cols = "jet",breaks = c(0, 1, 2,6), width = 1.5, paddle = FALSE, col = 'heat')
+```
+
