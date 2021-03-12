@@ -16,11 +16,11 @@ from statistics import mean
 #BSE has H2S stored under 'campbell'.
 ### IMPORTANT NOTE!!!
 
-Quarter = 'all' #input Quarter you want as a 'string'
-Year = 'all' #imput year you want or 'all'
-Species = '42i' #voc, picarro, campbell, 49c, o3, pm, 42i, or ch4
-SubSpecies = 'nox'#ch4, co2,PM2_5,h2s, ethane, propane, benzene ect... subspices will be plotted during datacheck
-Site = 'BRZ' #input the site you want
+Quarter = 'Q4' #input Quarter you want as a 'string' EX: 'Q1'
+Year = 2020 #imput year you want or 'all'
+Species = 'voc' #voc, picarro, campbell, 49c, o3, nox, pm, 42i, or ch4
+SubSpecies = 'ethane'#ch4, co2,PM2_5,h2s, ethane, propane, benzene ect... subspices will be plotted during datacheck
+Site = 'LUR' #input the site you want
 Directory = 'E:\IDAT in-out\csv_in' #imput file directory as a string''
 Saving_Directory = 'E:\Ready for wind plot dir'  #import directory you want to export file to as string'' exclude the last \
 Check_data = 'ON' #imput ON or OFF if you want to make a plot to check the data
@@ -135,7 +135,7 @@ if Species == 'ch4' and Site == 'BRZ':
 #finished correcting ch4 and co2 data format
 #fixing NO and NOx data format
 
-if Species == 'campbell' and (SubSpecies == 'no' or SubSpecies == 'nox'):
+if (Species == 'campbell' or Species == 'nox') and (SubSpecies == 'no' or SubSpecies == 'nox'):
     nox_data = pd.DataFrame()
     nox_data['time'] = data['time']
     nox_data['no'] = data['no']
@@ -150,6 +150,9 @@ if Species == 'campbell' and (SubSpecies == 'no' or SubSpecies == 'nox'):
 if Species == '42i':
     data = data.loc[data['mode'] == 0]
 
+if Species == 'nox':
+    data = data.loc[data['nox'] > 0]
+    data = data.loc[data['no'] > 0]
 #finished fixing NO and NOx data format
 #fixing Ozone data format
 
@@ -231,7 +234,7 @@ if Problem == 'YES' and SubSpecies == 'co2':
     ax1.set_xlim(data['time'].min(), data['time'].max())
     plt.show()
 
-if Ready_For_Export == 'YES' and Species == 'picarro' or Species == 'ch4':
+if Ready_For_Export == 'YES' and SubSpecies == 'ch4':
     bool_list = wind['time'].isin(data['time'])
     wind['bool'] = bool_list
     wind = wind.loc[wind['bool'] == True]
@@ -274,7 +277,7 @@ if Problem == 'YES' and SubSpecies == 'nox':
     ax1.set_xlim(data['time'].min(), data['time'].max())
     plt.show()
 
-if Ready_For_Export == 'YES' and Species == 'campbell' or Species == '42i' or Species == 'met':
+if Ready_For_Export == 'YES' and Species == 'nox':
     bool_list = wind['time'].isin(data['time'])
     wind['bool'] = bool_list
     wind = wind.loc[wind['bool'] == True]
@@ -301,7 +304,7 @@ if Problem == 'YES' and SubSpecies == 'o3':
     ax1.set_xlim(data['time'].min(), data['time'].max())
     plt.show()
 
-if Ready_For_Export == 'YES' and Species == '49c' or Species == 'o3':
+if Ready_For_Export == 'YES' and SubSpecies == 'o3':
     bool_list = wind['time'].isin(data['time'])
     wind['bool'] = bool_list
     wind = wind.loc[wind['bool'] == True]
